@@ -48,7 +48,6 @@ def calculatePBKandContrast(image):
                 total += 1
     return round(c/total * 100, 2), np.average(contrast)
 def calculateFuzzy(pbkInput,contrastInput):
-
     # New Antecedent/Consequent objects hold universe variables and membership
     # functions
     pbk = ctrl.Antecedent(np.arange(0, 30), 'pbk')
@@ -75,10 +74,10 @@ def calculateFuzzy(pbkInput,contrastInput):
     #good is high
     rule1 = ctrl.Rule(pbk['poor'] & dom['poor'], qual['medium'])
     rule2 = ctrl.Rule(pbk['poor'] & dom['average'], qual['high'])
-    rule3 = ctrl.Rule(pbk['poor'] & dom['good'], qual['high'])
+    rule3 = ctrl.Rule(pbk['poor'] & dom['good'], qual['high'] % 1.0)
     rule4 = ctrl.Rule(pbk['average'] & dom['poor'], qual['low'])
     rule5 = ctrl.Rule(pbk['average'] & dom['average'], qual['medium'])
-    rule6 = ctrl.Rule(pbk['average'] & dom['good'], qual['medium'])
+    rule6 = ctrl.Rule(pbk['average'] & dom['good'], qual['medium'] % 0.5)
     rule7 = ctrl.Rule(pbk['good'] & dom['poor'], qual['low'])
     rule8 = ctrl.Rule(pbk['good'] & dom['average'], qual['low'])
     rule9 = ctrl.Rule(pbk['good'] & dom['good'], qual['medium'])
@@ -102,7 +101,14 @@ fileName = sys.argv[1]
 image = cv2.imread("D:/UploadImagesProject/"+fileName)
 pbk, contrast = calculatePBKandContrast(image)
 fuzzOutput = calculateFuzzy(pbk, contrast)
-print('{"pbk": '+str(pbk)+', "quality": '+str(fuzzOutput)+"}")
+output = ''
+if fuzzOutput > 7:
+    output = 'Degree 3'
+elif fuzzOutput > 3.4:
+    output = 'Degree 2'
+else:
+    output = 'Degree 1'
+print('{"pbk": '+str(pbk)+', "quality": \"'+str(output)+'\"}')
 sys.stdout.flush()
 cv2.imwrite(os.path.join("D:/UploadImagesProject","processed_"+fileName), image)
 cv2.imwrite(os.path.join("D:/ricequalityanalysisgui/src/assets/","processed_"+fileName), image)
